@@ -1,0 +1,28 @@
+{
+  "name": "ocr-azure",
+  "version": "1.0.0",
+  "description": "ocr app using a MS Computer Vision resource",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlanLeverenz/OCR-AZURE.git"
+  },
+  "keywords": [
+    "OCR",
+    "computer",
+    "vision",
+    "node.js"
+  ],
+  "author": "Alan Leverenz, Sean Hellier, Tony Ho",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AlanLeverenz/OCR-AZURE/issues"
+  },
+  "homepage": "https://github.com/AlanLeverenz/OCR-AZURE#readme",
+  "dependencies": {
+    "@azure/cognitiveservices-computervision": "^7.1.0"
+  }
+}
