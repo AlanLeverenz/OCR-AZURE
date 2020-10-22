@@ -1,5 +1,7 @@
 'use strict';
 
+import axios from 'axios';
+
 const keys = require('./cv_keys');
 
 const async = require('async');
