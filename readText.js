@@ -1,7 +1,6 @@
-import axios from 'axios';
-
-const keys = require('./cv_keys');
-
+// import axios from 'axios';
+// const keys = require('./cv_keys');
+require('dotenv').config();
 const async = require('async');
 const fs = require('fs');
 const https = require('https');
@@ -14,9 +13,11 @@ const ApiKeyCredentials = require('@azure/ms-rest-js').ApiKeyCredentials;
 /**
  * AUTHENTICATE
  * This single client is used for all examples.
- */
+ */  
+
 const key = process.env['COMPUTER_VISION_SUBSCRIPTION_KEY'];
 const endpoint = process.env['COMPUTER_VISION_ENDPOINT']
+
 if (!key) { throw new Error('Set your environment variables for your subscription key in COMPUTER_VISION_SUBSCRIPTION_KEY and endpoint in COMPUTER_VISION_ENDPOINT.'); }
 // </snippet_vars>
 
