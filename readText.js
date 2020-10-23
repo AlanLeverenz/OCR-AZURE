@@ -1,5 +1,4 @@
-// import axios from 'axios';
-require('dotenv').config();
+// require('dotenv').config();
 const keys = require('./cv_keys');
 const async = require('async');
 const fs = require('fs');
@@ -171,6 +170,8 @@ function computerVision() {
       // URL images containing printed and/or handwritten text. 
       // The URL can point to image files (.jpg/.png/.bmp) or multi-page files (.pdf, .tiff).
       const printedTextSampleURL = 'https://moderatorsampleimages.blob.core.windows.net/samples/sample2.jpg';
+    //   const printedTextSampleURL = '/Users/alanleverenz/development/OCR-AZURE/sample2.png';
+    //   const printedTextSampleURL = 'https://github.com/AlanLeverenz/Web-Scraper/blob/master/public/assets/images/jumbotron.png';
       const multiLingualTextURL = 'https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/MultiLingual.png';
       const mixedMultiPagePDFURL = 'https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/MultiPageHandwrittenForm.pdf';
       // </snippet_read_images>
@@ -254,7 +255,6 @@ function computerVision() {
        */
 
       function downloadFilesToLocal(url, localFileName) {
-        //   localFileName = '/Users/alanleverenz/development/OCR-AZURE/downloadFile.txt';
         return new Promise((resolve, reject) => {
           console.log('--- Downloading file to local directory from: ' + url);
           const request = https.request(url, (res) => {
