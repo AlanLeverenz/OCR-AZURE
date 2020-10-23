@@ -1,6 +1,6 @@
 // import axios from 'axios';
-// const keys = require('./cv_keys');
 require('dotenv').config();
+const keys = require('./cv_keys');
 const async = require('async');
 const fs = require('fs');
 const https = require('https');
@@ -15,8 +15,11 @@ const ApiKeyCredentials = require('@azure/ms-rest-js').ApiKeyCredentials;
  * This single client is used for all examples.
  */  
 
-const key = process.env['COMPUTER_VISION_SUBSCRIPTION_KEY'];
-const endpoint = process.env['COMPUTER_VISION_ENDPOINT']
+// const key = process.env['COMPUTER_VISION_SUBSCRIPTION_KEY'];
+// const endpoint = process.env['COMPUTER_VISION_ENDPOINT']
+
+const key = keys.ids.key1;
+const endpoint = keys.ids.endpoint;
 
 if (!key) { throw new Error('Set your environment variables for your subscription key in COMPUTER_VISION_SUBSCRIPTION_KEY and endpoint in COMPUTER_VISION_ENDPOINT.'); }
 // </snippet_vars>
@@ -32,20 +35,137 @@ const computerVisionClient = new ComputerVisionClient(
 
 // <snippet_functiondef_begin>
 function computerVision() {
-
-    /**
-     * READ PRINTED & HANDWRITTEN TEXT
-     * Recognizes text from images using OCR (optical character recognition).
-     * Recognition is shown for both printed and handwritten text.
-     * Read 3.0 supports the following language: en (English), de (German), es (Spanish), fr (French), it (Italian), nl (Dutch) and pt (Portuguese).
-     */
-    console.log('-------------------------------------------------');
-    console.log('READ PRINTED, HANDWRITTEN TEXT AND PDF');
-    console.log();
-
-
     async.series([
       async function () {
+        // </snippet_functiondef_begin>
+
+    /**
+        *READ API
+        *
+        * This example recognizes both handwritten and printed text, and can handle image files (.jpg/.png/.bmp) and multi-page files (.pdf and .tiff)
+        * Please see REST API reference for more information:
+        * Read: https://westcentralus.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-ga/operations/5d986960601faab4bf452005
+        * Get Result Result: https://westcentralus.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-ga/operations/5d9869604be85dee480c8750
+        * 
+        */
+
+      // Status strings returned from Read API. NOTE: CASING IS SIGNIFICANT.
+      // Before Read 3.0, these are "Succeeded" and "Failed"
+      const STATUS_SUCCEEDED = "succeeded"; 
+      const STATUS_FAILED = "failed"
+
+      console.log('-------------------------------------------------');
+      console.log('READ');
+      console.log();
+      const printedTextURL = 'https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/printed_text.jpg';
+      const handwrittenTextURL = 'https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/handwritten_text.jpg';
+
+      const handwrittenImagePath = __dirname + '\\handwritten_text.jpg';
+      try {
+        await downloadFilesToLocal(handwrittenTextURL, handwrittenImagePath);
+      } catch {
+        console.log('>>> Download sample file failed. Sample cannot continue');
+        process.exit(1);
+      }
+
+      console.log('\nReading URL image for text in ...', printedTextURL.split('/').pop());
+      // API call returns a ReadResponse, grab the operation location (ID) from the response.
+      const operationLocationUrl = await computerVisionClient.read(printedTextURL)
+        .then((response) => {
+          return response.operationLocation;
+        });
+
+      console.log();
+      // From the operation location URL, grab the last element, the operation ID.
+      const operationIdUrl = operationLocationUrl.substring(operationLocationUrl.lastIndexOf('/') + 1);
+
+      // Wait for the read operation to finish, use the operationId to get the result.
+      while (true) {
+        const readOpResult = await computerVisionClient.getReadResult(operationIdUrl)
+          .then((result) => {
+            return result;
+          })
+        console.log('Read status: ' + readOpResult.status)
+        if (readOpResult.status === STATUS_FAILED) {
+          console.log('The Read File operation has failed.')
+          break;
+        }
+        if (readOpResult.status === STATUS_SUCCEEDED) {
+          console.log('The Read File operation was a success.');
+          console.log();
+          console.log('Read File URL image result:');
+          // Print the text captured
+
+          // Looping through: TextRecognitionResult[], then Line[]
+          for (const textRecResult of readOpResult.analyzeResult.readResults) {
+            for (const line of textRecResult.lines) {
+              console.log(line.text)
+            }
+          }
+          break;
+        }
+        await sleep(1000);
+      }
+      console.log();
+
+      // With a local image, get the text.
+      console.log('\Reading local image for text in ...', path.basename(handwrittenImagePath));
+
+      // Call API, returns a Promise<Models.readInStreamResponse>
+      const streamResponse = await computerVisionClient.readInStream(() => createReadStream(handwrittenImagePath))
+        .then((response) => {
+          return response;
+        });
+
+      console.log();
+      // Get operation location from response, so you can get the operation ID.
+      const operationLocationLocal = streamResponse.operationLocation
+      // Get the operation ID at the end of the URL
+      const operationIdLocal = operationLocationLocal.substring(operationLocationLocal.lastIndexOf('/') + 1);
+
+      // Wait for the read operation to finish, use the operationId to get the result.
+      while (true) {
+        const readOpResult = await computerVisionClient.getReadResult(operationIdLocal)
+          .then((result) => {
+            return result;
+          })
+        console.log('Read status: ' + readOpResult.status)
+        if (readOpResult.status === STATUS_FAILED) {
+          console.log('The Read File operation has failed.')
+          break;
+        }
+        if (readOpResult.status === STATUS_SUCCEEDED) {
+          console.log('The Read File operation was a success.');
+          console.log();
+          console.log('Read File local image result:');
+          // Print the text captured
+
+          // Looping through: pages of result from readResults[], then Line[]
+          for (const textRecResult of readOpResult.analyzeResult.readResults) {
+            for (const line of textRecResult.lines) {
+              console.log(line.text)
+            }
+          }
+          break;
+        }
+        await sleep(1000);
+      }
+      console.log();
+      /**
+      * END - READ API
+      */
+        /**
+         * READ PRINTED & HANDWRITTEN TEXT
+         * Recognizes text from images using OCR (optical character recognition).
+         * Recognition is shown for both printed and handwritten text.
+         * Read 3.0 supports the following language: en (English), de (German), es (Spanish), fr (French), it (Italian), nl (Dutch) and pt (Portuguese).
+         */
+        console.log('-------------------------------------------------');
+        console.log('READ PRINTED, HANDWRITTEN TEXT AND PDF');
+        console.log();
+
+    // async.series([
+    //   async function () {
 
       // <snippet_read_images>
       // URL images containing printed and/or handwritten text. 
@@ -132,7 +252,9 @@ function computerVision() {
        * Download the specified file in the URL to the current local folder
        * 
        */
+
       function downloadFilesToLocal(url, localFileName) {
+        //   localFileName = '/Users/alanleverenz/development/OCR-AZURE/downloadFile.txt';
         return new Promise((resolve, reject) => {
           console.log('--- Downloading file to local directory from: ' + url);
           const request = https.request(url, (res) => {
@@ -171,14 +293,14 @@ function computerVision() {
     },
 
     function () {
-      return new Promise((resolve) => {
-        resolve();
-      })
-    }
-  ], (err) => {
-    throw (err);
-  });
-}
+        return new Promise((resolve) => {
+          resolve();
+        })
+      }
+    ], (err) => {
+      throw (err);
+    });
+  }
 
 computerVision();
 // </snippet_functiondef_end>
