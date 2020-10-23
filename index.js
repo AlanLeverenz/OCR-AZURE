@@ -76,3 +76,16 @@ function computerVision() {
     }
     
     computerVision(); 
+
+    // .done(function(data) {
+    //   data.regions[0].lines.map(obj => {
+    //     let line = ""
+    //     obj.words.forEach(x => {
+    //       if(line != ""){
+    //         line += ` ${x.text}`
+    //       }else{
+    //         line += x.text
+    //       }    
+    //     })
+
+
