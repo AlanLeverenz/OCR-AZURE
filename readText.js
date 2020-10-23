@@ -184,7 +184,7 @@ function computerVision() {
 
       // Recognize text in handwritten image from a local file
       
-      const handwrittenImageLocalPath = __dirname + '\\handwritten_text.jpg';
+      const handwrittenImageLocalPath = __dirname + '\\handwritten_text.jpg'; // for Windows
       console.log('\nRead handwritten text from local file...', handwrittenImageLocalPath);
       const handwritingResult = await readTextFromFile(computerVisionClient, handwrittenImageLocalPath);
       printRecText(handwritingResult);
